@@ -1,24 +1,11 @@
-import { createContext, useState } from "react"
+import { useState } from "react"
+import { authContext } from "./context";
 
-const UserContext = createContext({
-    username: "",
-    guardarUser: 
-});
-
-const UserProvider = ({ children }) => {
-
-    const [user, setUser] = useState();
-
-    const guardarUsuario = (usuario) => {
-        setUser(usuario)
-    }
-
+export const AuthProvider = ({ children }) => {
+    const [Auth, setAuth] = useState("false");
     return (
-        <UserContext.Provider value={{ user, guardarUsuario }}>
+        <authContext.Provider value={{ Auth }}>
             {children}
-        </UserContext.Provider>
+        </authContext.Provider>
     )
-
 }
-
-export { UserContext, UserProvider }

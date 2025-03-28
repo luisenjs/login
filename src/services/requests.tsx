@@ -7,8 +7,8 @@ export async function refreshToken(token: string) {
             'Content-Type': 'application/json',
         }
     })
-    localStorage.setItem("TOKEN", data.data.access_token);
-    console.log("cambio");
+    localStorage.setItem("token", data.data.access_token);
+    console.log(data.data);
 }
 
 export async function login(username: string, password: string) {
@@ -23,6 +23,6 @@ export async function login(username: string, password: string) {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
     })
-    localStorage.setItem("TOKEN", data.data.access_token);
+    localStorage.setItem("token", data.data.access_token);
     console.log("acceso");
 }

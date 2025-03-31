@@ -1,9 +1,9 @@
 import { FieldValues, useForm } from 'react-hook-form'
-import { ToastContainer } from "react-toastify"
+import { toast } from "react-toastify"
 import { AuthContext } from "../../context/authcontext"
 import { useContext } from "react"
 import { useNavigate } from 'react-router'
-import { Button } from '../../button'
+import { Button } from '../../components/button'
 
 type loginprops = {
     className: string
@@ -13,27 +13,19 @@ export const LoginForm = ({ className }: loginprops) => {
 
     const { login } = useContext(AuthContext)
 
-    const { register, handleSubmit } = useForm();
+    const { register, handleSubmit, reset } = useForm();
 
     const navigate = useNavigate();
 
-    /*const loginError = () => toast.error("Usuario o contraseña incorrectos", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-    });*/
-
     const enviardatos = async (data: FieldValues) => {
         console.log(data)
-        const isLogin = login!(data.username, data.password);
+        reset();
+        const isLogin = login(data.username, data.password);
         if (await isLogin) {
+            toast.success("Bienvenido");
             navigate("/dashboard");
+        } else {
+            toast.error("Usuario o contraseña incorrectos");
         }
     }
 
@@ -69,7 +61,6 @@ export const LoginForm = ({ className }: loginprops) => {
                     <p>Don't you have an account? <a className="text-sky-600 hover:text-sky-800 hover:underline">Sign up</a></p>
                 </div>
             </div>
-            <ToastContainer />
         </>
     )
 }

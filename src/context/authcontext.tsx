@@ -1,22 +1,25 @@
-import axios from "axios";
 import { createContext, useEffect, useState } from "react";
+import { logintest } from "../services/requests";
 
 type AuthContextType = {
     username: string;
-    login?: (username: string, password: string) => Promise<boolean>;
-    logout?: () => void;
+    login: (username: string, password: string) => Promise<boolean>;
+    logout: () => void;
     isAuth: boolean;
-    isLoading?: boolean;
+    isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
-    username: "string",
-    isAuth: false
+    username: "",
+    login: async () => false,
+    logout: () => { },
+    isAuth: false,
+    isLoading: true
 });
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
 
-    const [username, setUsername] = useState<string>("");
+    const [username, setUsername] = useState<string>("Unknown");
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -32,28 +35,16 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     }, [username])
 
     async function login(username: string, password: string) {
-        try {
-            const param = {
-                'username': username,
-                'password': password,
-                'client_id': 'sasfdesarrollo',
-                'client_secret': 'S@sfD3sarr0ll0',
-            }
-            const data = await axios.post("http://192.168.0.115:8000/security/v2/oauth/login", new URLSearchParams(param), {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            })
-            localStorage.setItem("token", data.data.access_token);
-            console.log(data.data)
+        //const islogingsuccess = loginreq(username, password);
+        const islogingsuccess = logintest(username, password);
+        if (await islogingsuccess) {
             setIsAuth(true);
-            console.log("acceso");
             setUsername(username);
-            return (true);
-        } catch (error) {
-            console.log(error)
+            return true;
+        }
+        else {
             setIsAuth(false);
-            return (false);
+            return false;
         }
     }
 

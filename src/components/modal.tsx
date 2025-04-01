@@ -30,7 +30,7 @@ const Modal = ({ isOpen, onClose, title, description, children }: modalprops) =>
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/70">
-            <div className="bg-white rounded-lg shadow-lg p-6 z-20 max-h-[80vh] min-w-[40vw] max-w-[50vw] relative">
+            <div className="bg-white rounded-lg shadow-lg p-6 z-20 max-h-[80vh] min-w-[50vw] max-w-[70vw] relative">
                 <button className="absolute top-6 right-6 text-gray-800 hover:text-gray-500 text-2xl font-bold" onClick={onClose}>
                     ✕
                 </button>

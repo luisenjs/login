@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { logintest } from "../services/requests";
+import { loginreq } from "../services/requests";
 
 type AuthContextType = {
     username: string;
@@ -29,14 +29,13 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = localStorage.getItem("token");
         if (token) {
             setIsAuth(true)
-            setUsername(username);
         }
         setIsLoading(false);
     }, [username])
 
     async function login(username: string, password: string) {
-        //const islogingsuccess = loginreq(username, password);
-        const islogingsuccess = logintest(username, password);
+        const islogingsuccess = loginreq(username, password);
+        //const islogingsuccess = logintest(username, password);
         if (await islogingsuccess) {
             setIsAuth(true);
             setUsername(username);

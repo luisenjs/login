@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, SquareP
 import { useState } from 'react';
 
 type tableprops<T> = {
-    data: T[];
+    data: T[] | undefined;
     columns: AccessorKeyColumnDef<T, string>[];
     openNewForm: () => void;
     openEditForm: (data: T) => void;
@@ -14,7 +14,7 @@ function Table<T>({ data, columns, openNewForm, openEditForm}: tableprops<T>) {
     const [buscador, setBuscador] = useState<string>('')
 
     const table = useReactTable({
-        data,
+        data: data || [],
         columns,
         state: {
             globalFilter: buscador
@@ -60,7 +60,7 @@ function Table<T>({ data, columns, openNewForm, openEditForm}: tableprops<T>) {
                                         {
                                             headerGroup.headers.map(header => (
                                                 <th className='text-gray-500 uppercase cursor-pointer' onClick={header.column.getToggleSortingHandler()} key={header.id}>
-                                                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                                    {flexRender(header.column.columnDef.header, header.getContext())}
                                                 </th>
                                             ))
                                         }

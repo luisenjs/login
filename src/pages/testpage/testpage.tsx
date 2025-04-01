@@ -2,7 +2,7 @@ import { ArrowUpDown } from "lucide-react";
 import Table from "../../components/table"
 import { createColumnHelper } from "@tanstack/react-table";
 import Modal from "../../components/modal";
-import { UsuariosForm } from "../usuarios/usuariosform";
+import { EmpleadosForm } from "../empleados/empleadosform";
 import { useState } from "react";
 
 export type UserData = {
@@ -221,10 +221,10 @@ export const TestPage = () => {
         <div className="h-full">
             <Table data={data} columns={columns} openNewForm={onCreate} openEditForm={onEdit} />
             <Modal isOpen={isNewUserFormOpen} onClose={() => setIsNewUserFormOpen(false)} title="Crear nuevo usuario" description="Complete los campos para crear un nuevo usuario">
-                <UsuariosForm className="w-full" onClose={() => setIsNewUserFormOpen(false)} />
+                <EmpleadosForm className="w-full" onClose={() => setIsNewUserFormOpen(false)} />
             </Modal>
             <Modal isOpen={isUpdateUserFormOpen} onClose={() => setIsUpdateUserFormOpen(false)} title="Editar usuario" description="Complete los campos para actualizar el usuario">
-                <UsuariosForm className="w-full" onClose={() => setIsUpdateUserFormOpen(false)} user={userData}/>
+                <EmpleadosForm className="w-full" onClose={() => setIsUpdateUserFormOpen(false)} user={userData}/>
             </Modal>
         </div>
     )

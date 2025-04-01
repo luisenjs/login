@@ -12,7 +12,7 @@ type usuariosformprops = {
     onClose: () => void
 }
 
-export const UsuariosForm = ({ className, user, onClose }: usuariosformprops) => {
+export const EmpleadosForm = ({ className, user, onClose }: usuariosformprops) => {
 
     const { register, handleSubmit, reset } = useForm();
 

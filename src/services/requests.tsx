@@ -41,3 +41,13 @@ export function logintest(username: string, password: string): boolean {
     }
     return false;
 }
+
+export async function getEmpleados(token: string, page: number, size: number) {
+    const data = await axios.get(`http://192.168.0.115:8505/rhem/rhemEmpleado/1?page=${page}&size=${size}`, {
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+        }
+    })
+    return data;
+}

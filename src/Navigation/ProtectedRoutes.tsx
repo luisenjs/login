@@ -2,7 +2,7 @@ import { useContext } from "react"
 import { AuthContext } from "../context/authcontext"
 import { Navigate } from "react-router";
 import { Login } from "../pages/login/login";
-import { Dashboard } from "../pages/usuarios/usuarios";
+import { Dashboard } from "../pages/empleados/empleados";
 
 export const ProtectedLogin = () => {
     

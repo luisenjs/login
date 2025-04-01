@@ -10,7 +10,7 @@ export const MainLayout = () => {
 
     return (
         <div className="min-h-screen flex flex-col">
-            <header className="h-[10vh] bg-sky-700 p-4 flex justify-between items-center">
+            <header className="h-28 bg-sky-700 p-4 flex justify-between items-center">
                 <div>
                     <h1 className="text-white text-2xl font-bold">Hola {username}</h1>
                     <h1 className="text-white">Bienveido a la administración del sistema</h1>

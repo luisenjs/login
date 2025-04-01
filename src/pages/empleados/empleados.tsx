@@ -6,20 +6,33 @@ import { getEmpleados, refreshToken } from "../../services/requests";
 import { createColumnHelper } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import Table from "../../components/table";
+import Modal from "../../components/modal";
+import { EmpleadosForm } from "./empleadosform";
 
-type empleadosShowData = {
+export type empleadosShowData = {
+    id: {
+        codigo: string;
+    }
     numeroIdentificacion: string;
     nombres: string;
     apellidos: string;
-    correoElectronico: string;
-    correoNotificacion: string;
-    numeroConvencional: string;
-    numeroCelular: string;
+    mailPrincipal: string;
+    telefonoCelular: string;
+    cargo: {
+        descripcion: string
+    }
 };
 
 const columnHelper = createColumnHelper<empleadosShowData>();
 
 const columns = [
+    columnHelper.accessor('id.codigo', {
+        header: () => (
+            <span className="flex gap-2 items-center">
+                Código  <ArrowUpDown className='size-4' />
+            </span>),
+        cell: info => <p>{info.getValue()}</p>,
+    }),
     columnHelper.accessor('numeroIdentificacion', {
         header: () => (
             <span className="flex gap-2 items-center">
@@ -37,45 +50,36 @@ const columns = [
     columnHelper.accessor('apellidos', {
         header: () => (
             <span className="flex gap-2 items-center">
-                Apellidos  <ArrowUpDown className='size-4' />
+                Apellidos <ArrowUpDown className='size-4' />
+            </span>),
+        cell: info => (
+            <a href={`mailto:${info.getValue()}`} className="italic text-blue-500 hover:underline">{info.getValue()}</a>
+        ),
+    }),
+    columnHelper.accessor('mailPrincipal', {
+        header: () => (
+            <span className="flex gap-2 items-center">
+                Correo <ArrowUpDown className='size-4' />
+            </span>),
+        cell: info => (
+            <a href={`mailto:${info.getValue()}`} className="italic text-blue-500 hover:underline">{info.getValue()}</a>
+        ),
+    }),
+    columnHelper.accessor('telefonoCelular', {
+        header: () => (
+            <span className="flex gap-2 items-center">
+                Telefono <ArrowUpDown className='size-4' />
+            </span>),
+        cell: info => (
+            <a href={`tel:${info.getValue()}`} className="text-blue-500 hover:underline">{info.getValue()}</a>
+        ),
+    }),
+    columnHelper.accessor('cargo.descripcion', {
+        header: () => (
+            <span className="flex gap-2 items-center">
+                Cargo  <ArrowUpDown className='size-4' />
             </span>),
         cell: info => <p>{info.getValue()}</p>,
-    }),
-    columnHelper.accessor('correoElectronico', {
-        header: () => (
-            <span className="flex gap-2 items-center">
-                Correo electrónico  <ArrowUpDown className='size-4' />
-            </span>),
-        cell: info => (
-            <a href={`mailto:${info.getValue()}`} className="italic text-blue-500 hover:underline">{info.getValue()}</a>
-        ),
-    }),
-    columnHelper.accessor('correoNotificacion', {
-        header: () => (
-            <span className="flex gap-2 items-center">
-                Correo de notificación  <ArrowUpDown className='size-4' />
-            </span>),
-        cell: info => (
-            <a href={`mailto:${info.getValue()}`} className="italic text-blue-500 hover:underline">{info.getValue()}</a>
-        ),
-    }),
-    columnHelper.accessor('numeroConvencional', {
-        header: () => (
-            <span className="flex gap-2 items-center">
-                Número convencional  <ArrowUpDown className='size-4' />
-            </span>),
-        cell: info => (
-            <a href={`tel:${info.getValue()}`} className="text-blue-500 hover:underline">{info.getValue()}</a>
-        ),
-    }),
-    columnHelper.accessor('numeroCelular', {
-        header: () => (
-            <span className="flex gap-2 items-center">
-                Número celular  <ArrowUpDown className='size-4' />
-            </span>),
-        cell: info => (
-            <a href={`tel:${info.getValue()}`} className="text-blue-500 hover:underline">{info.getValue()}</a>
-        ),
     }),
 ]
 
@@ -93,6 +97,16 @@ export const Empleados = () => {
 
     const timeleft = timeExp.exp - currentTime;
 
+    const [page, setPage] = useState<number>(0);
+
+    const [size, setSize] = useState<number>(5);
+
+    const [isNewUserFormOpen, setIsNewUserFormOpen] = useState(false)
+
+    const [isUpdateUserFormOpen, setIsUpdateUserFormOpen] = useState(false)
+
+    const [empleadoData, seEmpleadoData] = useState<empleadosShowData | undefined>(undefined);
+
     async function getdata(page: number, size: number) {
         console.log("haciendo petición...")
         if (!token) {
@@ -102,14 +116,13 @@ export const Empleados = () => {
             refreshToken(token!);
         }
         const data = await getEmpleados(token!, page, size);
-        console.log("Contenido de la data");
         console.log(data.data.content)
         setEmpleados(data.data.content)
     }
 
     useEffect(() => {
-        getdata(0, 10)
-    }, [])
+        getdata(page, size)
+    }, [size])
 
     if (timeleft < 0) {
         toast.info("El token ha expirado", { autoClose: false });
@@ -120,10 +133,24 @@ export const Empleados = () => {
         logout();
     }
 
+    function onCreate() {
+        setIsNewUserFormOpen(true);
+    }
+
+    function onEdit(empleado: empleadosShowData) {
+        setIsUpdateUserFormOpen(true);
+        seEmpleadoData(empleado);
+    }
+
     return (
-        <div className="flex flex-col gap-5 items-center h-screen">
-            <h3>Tiempo de expiración del token: {timeleft}</h3>
-            <Table data={empleados} columns={columns} openNewForm={() => { }} openEditForm={() => { }}></Table>
+        <div className="flex flex-col gap-5 items-center h-screen max-w-screen">
+            <Table tipo="empleado" data={empleados} columns={columns} setPage={setPage} setSize={setSize} openNewForm={onCreate} openEditForm={onEdit}></Table>
+            <Modal className="rounded-sm" isOpen={isNewUserFormOpen} onClose={() => setIsNewUserFormOpen(false)} title="Crear nuevo usuario" description="Complete los campos para crear un nuevo usuario">
+                <EmpleadosForm token={token!} className="w-full" onClose={() => setIsNewUserFormOpen(false)} />
+            </Modal>
+            <Modal className="rounded-sm" isOpen={isUpdateUserFormOpen} onClose={() => setIsUpdateUserFormOpen(false)} title="Editar usuario" description="Complete los campos para actualizar el usuario">
+                <EmpleadosForm token={token!} className="w-full" onClose={() => setIsUpdateUserFormOpen(false)} empleado={empleadoData} />
+            </Modal>
         </div>
     )
 }

@@ -3,27 +3,47 @@ import { toast } from "react-toastify"
 //import { AuthContext } from "../../context/authcontext"
 //import { useContext } from "react"
 import { Button } from '../../components/button'
-import { UserData } from '../testpage/testpage'
-
+import { putEmpleado } from '../../services/requests'
+import { empleadosShowData } from './empleados'
 
 type usuariosformprops = {
     className?: string,
-    user?: UserData,
+    token: string,
+    empleado?: empleadosShowData,
     onClose: () => void
 }
 
-export const EmpleadosForm = ({ className, user, onClose }: usuariosformprops) => {
+export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosformprops) => {
 
     const { register, handleSubmit, reset } = useForm();
 
-    const sendData = (data: FieldValues) => {
+    const sendData = async (data: FieldValues) => {
         if (data.numeroIdentificacion === "" || data.nombres === "" || data.apellidos === "" || data.correoElectronico === "" || data.correoNotificacion === "" || data.numeroConvencional === "" || data.numeroCelular === "") {
             toast.error("Por favor, complete todos los campos requeridos.");
             reset();
-        } else {
-            toast.error("No se puede crear el usuario, no hay backend");
-            onClose();
         }
+        if (empleado) {
+            const body = {
+                estado: "A",
+                id: {
+                    "ageLicencCodigo": empleado.id.ageLicencCodigo,
+                    "codigo": empleado.id.codigo
+                },
+                numeroIdentificacion: data.numeroIdentificacion,
+                nombres: data.nombres,
+                apellidos: data.apellidos,
+                correoElectronico: data.correoElectronico,
+                correoNotificacion: data.correoNotificacion,
+                numeroConvencional: data.numeroConvencional,
+                numeroCelular: data.numeroCelular,
+                fechaEntrada: "2023-06-01T00:00:00.000-05:00"
+            }
+            console.log(body)
+            const response = await putEmpleado(token, body);
+            console.log(response);
+            location.reload();
+        }
+        onClose();
     }
 
     return (
@@ -33,31 +53,31 @@ export const EmpleadosForm = ({ className, user, onClose }: usuariosformprops) =
                     <div className='flex flex-row flex-wrap gap-4 items-center'>
                         <div className="flex flex-col items-start w-full md:w-[49%]">
                             <label className="font-semibold" htmlFor="numeroIdentificacion">Número Identificación</label>
-                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("numeroIdentificacion")} defaultValue={user ? user.numeroIdentificacion : ""} id="numeroIdentificacion" />
+                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("numeroIdentificacion")} defaultValue={empleado ? empleado.numeroIdentificacion : ""} id="numeroIdentificacion" />
                         </div>
                         <div className="flex flex-col items-start w-full md:w-[49%]">
                             <label className="font-semibold" htmlFor="nombres">Nombres</label>
-                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("nombres")} defaultValue={user ? user.nombres : ""} id="nombres" />
+                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("nombres")} defaultValue={empleado ? empleado.nombres : ""} id="nombres" />
                         </div>
                         <div className="flex flex-col items-start w-full md:w-[49%]">
                             <label className="font-semibold" htmlFor="apellidos">Apellidos</label>
-                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("apellidos")} defaultValue={user ? user.apellidos : ""} id="apellidos" />
+                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("apellidos")} defaultValue={empleado ? empleado.apellidos : ""} id="apellidos" />
                         </div>
                         <div className="flex flex-col items-start w-full md:w-[49%]">
                             <label className="font-semibold" htmlFor="correoElectronico">Correo electrónico</label>
-                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("correoElectronico")} defaultValue={user ? user.correoElectronico : ""} id="correoElectronico" />
+                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("correoElectronico")} defaultValue={empleado ? empleado.correoElectronico : ""} id="correoElectronico" />
                         </div>
                         <div className="flex flex-col items-start w-full md:w-[49%]">
                             <label className="font-semibold" htmlFor="correoNotificacion">Correo de notificación</label>
-                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("correoNotificacion")} defaultValue={user ? user.correoNotificacion : ""} id="correoNotificacion" />
+                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("correoNotificacion")} defaultValue={empleado ? empleado.correoNotificacion : ""} id="correoNotificacion" />
                         </div>
                         <div className="flex flex-col items-start w-full md:w-[49%]">
                             <label className="font-semibold" htmlFor="numeroConvencional">Número convencional</label>
-                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("numeroConvencional")} defaultValue={user ? user.numeroConvencional : ""} id="numeroConvencional" />
+                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("numeroConvencional")} defaultValue={empleado ? empleado.numeroConvencional : ""} id="numeroConvencional" />
                         </div>
                         <div className="flex flex-col items-start w-full md:w-[49%]">
                             <label className="font-semibold" htmlFor="numeroCelular">Número celular</label>
-                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("numeroCelular")} defaultValue={user ? user.numeroCelular : ""} id="numeroCelular" />
+                            <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="text" {...register("numeroCelular")} defaultValue={empleado ? empleado.numeroCelular : ""} id="numeroCelular" />
                         </div>
                     </div>
                     <Button isPrincipal={true}>Sign in</Button>

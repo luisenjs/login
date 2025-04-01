@@ -1,5 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { loginreq } from "../services/requests";
+import { jwtDecode } from "jwt-decode";
 
 type AuthContextType = {
     username: string;
@@ -29,6 +30,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = localStorage.getItem("token");
         if (token) {
             setIsAuth(true)
+            setUsername(jwtDecode(token).sub!)
         }
         setIsLoading(false);
     }, [username])

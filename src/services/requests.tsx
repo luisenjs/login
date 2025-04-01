@@ -43,7 +43,27 @@ export function logintest(username: string, password: string): boolean {
 }
 
 export async function getEmpleados(token: string, page: number, size: number) {
-    const data = await axios.get(`http://192.168.0.115:8505/rhem/rhemEmpleado/1?page=${page}&size=${size}`, {
+    const data = await axios.get(`http://192.168.0.115:8431/rpe/rpeEmpleados/1?page=${page}&size=${size}`, {
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+        }
+    })
+    return data;
+}
+
+export async function putEmpleado(token: string, body: object) {
+    const data = await axios.put("http://192.168.0.115:8505/rhem/rhemEmpleado", body, {
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+        }
+    })
+    return data;
+}
+
+export async function getEmpleadoById(token: string, ageLicencCodigo: number, id: number) {
+    const data = await axios.get(`http://192.168.0.115:8505/rhem/rhemEmpleado/${ageLicencCodigo}/${id}`, {
         headers: {
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json',

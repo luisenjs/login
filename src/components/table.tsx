@@ -5,13 +5,16 @@ type tableprops<T> = {
     tipo: string;
     data: T[] | undefined;
     columns: AccessorKeyColumnDef<T, string>[];
+    page: number;
     setPage: React.Dispatch<React.SetStateAction<number>>
+    totalPages: number;
     setSize: React.Dispatch<React.SetStateAction<number>>
     openNewForm: () => void;
     openEditForm: (data: T) => void;
+    openDelete: (data: T) => void;
 }
 
-function Table<T>({ tipo, data, columns, setSize, openNewForm, openEditForm }: tableprops<T>) {
+function Table<T>({ tipo, data, columns, page, setPage, totalPages, setSize, openNewForm, openEditForm, openDelete }: tableprops<T>) {
 
     const table = useReactTable({
         data: data || [],
@@ -21,16 +24,8 @@ function Table<T>({ tipo, data, columns, setSize, openNewForm, openEditForm }: t
         getFilteredRowModel: getFilteredRowModel()
     })
 
-    function onCreate() {
-        openNewForm()
-    }
-
-    function onEdit(data: T) {
-        openEditForm(data)
-    }
-
     return (
-        <div className='flex flex-col py-4 px-6 h-auto max-w-screen'>
+        <div className='flex flex-col py-4 px-16 h-auto max-w-screen'>
             <div className='flex flex-row justify-between items-center mb-4'>
                 <div className='flex flex-col gap-2 p-2'>
                     <h3 className='font-bold px-1 text-2xl text-slate-700'>Administración de {tipo}</h3>
@@ -43,7 +38,7 @@ function Table<T>({ tipo, data, columns, setSize, openNewForm, openEditForm }: t
                         </select>
                     </div>
                 </div>
-                <button className='bg-slate-300 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500' onClick={() => onCreate()}>Agregar {tipo}</button>
+                <button className='bg-slate-300 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500' onClick={openNewForm}>Agregar {tipo}</button>
             </div>
             <div className='bg-white shadow-md rounded-sm overflow-auto'>
                 <table className='w-full'>
@@ -66,7 +61,7 @@ function Table<T>({ tipo, data, columns, setSize, openNewForm, openEditForm }: t
                     <tbody>
                         {
                             table.getRowModel().rows.map(row => (
-                                <tr className='h-[60px] hover:bg-gray-200 hover:font-medium' key={row.id}>
+                                <tr className='h-[60px] hover:bg-gray-200' key={row.id}>
                                     {
                                         row.getVisibleCells().map(cell => (
                                             <td className='text-slate-700' key={cell.id}>
@@ -76,8 +71,8 @@ function Table<T>({ tipo, data, columns, setSize, openNewForm, openEditForm }: t
                                     }
                                     <td className='acciones text-gray-500'>
                                         <div className='flex gap-3 items-center'>
-                                            <button className='border-1 border-white text-green-600 flex flex-row rounded-sm hover:bg-green-200 hover:border hover:border-green-500 py-1 px-3' onClick={() => onEdit(row.original)}><SquarePen />Editar</button>
-                                            <button className='border-1 border-white text-red-600 flex flex-row rounded-sm hover:bg-red-200 hover:border hover:border-red-500 py-1 px-3'><Trash2 />Eliminar</button>
+                                            <button className='border-1 border-white text-green-600 flex flex-row rounded-sm hover:bg-green-200 hover:border hover:border-green-500 py-1 px-3' onClick={() => openEditForm(row.original)}><SquarePen />Editar</button>
+                                            <button className='border-1 border-white text-red-600 flex flex-row rounded-sm hover:bg-red-200 hover:border hover:border-red-500 py-1 px-3' onClick={() => (openDelete(row.original))}><Trash2 />Eliminar</button>
                                         </div>
                                     </td>
                                 </tr>
@@ -98,18 +93,18 @@ function Table<T>({ tipo, data, columns, setSize, openNewForm, openEditForm }: t
                     </select>
                 </div>
                 <div className='flex gap-3 items-center justify-center p-3'>
-                    <button onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()} className={`bg-gray-200 p-2 rounded-lg ${!table.getCanPreviousPage() && 'cursor-not-allowed opacity-60'}`}>
-                        <ChevronsLeft className='size-6 text-gray-400' />
+                    <button onClick={() => setPage(0)} className={`bg-slate-300 hover:bg-slate-400 p-2 rounded-lg`}>
+                        <ChevronsLeft className='size-6 text-slate-700' />
                     </button>
-                    <button onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()} className={`bg-gray-200 p-2 rounded-lg ${!table.getCanPreviousPage() && 'cursor-not-allowed opacity-60'}`}>
-                        <ChevronLeft className='size-6 text-gray-400' />
+                    <button onClick={() => setPage(page - 1)} disabled={page < 1} className={`bg-slate-300 hover:bg-slate-400 p-2 rounded-lg ${page < 1 && 'cursor-not-allowed opacity-60'}`}>
+                        <ChevronLeft className='size-6 text-slate-700' />
                     </button>
-                    <span> Página {table.getState().pagination.pageIndex + 1} de {table.getPageCount()}</span>
-                    <button onClick={() => table.nextPage()} disabled={!table.getCanNextPage()} className={`bg-gray-200 p-2 rounded-lg ${!table.getCanNextPage() && 'cursor-not-allowed opacity-60'}`}>
-                        <ChevronRight className='size-6 text-gray-400' />
+                    <span>Página actual: {page + 1} de {totalPages}</span>
+                    <button onClick={() => setPage(page + 1)} disabled={page >= totalPages - 1} className={`bg-slate-300 hover:bg-slate-400 p-2 rounded-lg ${page >= totalPages - 1 && 'cursor-not-allowed opacity-60'}`}>
+                        <ChevronRight className='size-6 text-slate-700' />
                     </button>
-                    <button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()} className={`bg-gray-200 p-2 rounded-lg ${!table.getCanNextPage() && 'cursor-not-allowed opacity-60'}`}>
-                        <ChevronsRight className='size-6 text-gray-400' />
+                    <button onClick={() => setPage(totalPages - 1)} className={`bg-slate-300 hover:bg-slate-400 p-2 rounded-lg`}>
+                        <ChevronsRight className='size-6 text-slate-700' />
                     </button>
                 </div>
             </div>

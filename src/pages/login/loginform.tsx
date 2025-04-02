@@ -20,8 +20,10 @@ export const LoginForm = ({ className }: loginprops) => {
     const enviardatos = async (data: FieldValues) => {
         console.log(data)
         reset();
-        const isLogin = login(data.username, data.password);
-        if (await isLogin) {
+        const isLogin = await toast.promise(login(data.username, data.password), {
+            pending: "Verificando credenciales..."
+        })
+        if (isLogin) {
             toast.success("Bienvenido");
             navigate("/dashboard");
         } else {

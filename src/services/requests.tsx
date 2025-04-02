@@ -43,7 +43,7 @@ export function logintest(username: string, password: string): boolean {
 }
 
 export async function getEmpleados(token: string, page: number, size: number) {
-    const data = await axios.get(`http://192.168.0.115:8431/rpe/rpeEmpleados/1?page=${page}&size=${size}`, {
+    const data = await axios.get(`http://192.168.0.115:8431/rpe/rpeEmpleados/1?page=${page}&size=${size}&sort=id.codigo%2Cdesc`, {
         headers: {
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json',
@@ -53,7 +53,7 @@ export async function getEmpleados(token: string, page: number, size: number) {
 }
 
 export async function putEmpleado(token: string, body: object) {
-    const data = await axios.put("http://192.168.0.115:8505/rhem/rhemEmpleado", body, {
+    const data = await axios.put("http://192.168.0.115:8431/rpe/rpeEmpleados", body, {
         headers: {
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json',
@@ -64,6 +64,57 @@ export async function putEmpleado(token: string, body: object) {
 
 export async function getEmpleadoById(token: string, ageLicencCodigo: number, id: number) {
     const data = await axios.get(`http://192.168.0.115:8505/rhem/rhemEmpleado/${ageLicencCodigo}/${id}`, {
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+        }
+    })
+    return data;
+}
+
+export async function postEmpleado(token: string, body: object) {
+    const data = await axios.post("http://192.168.0.115:8431/rpe/rpeEmpleados", body, {
+        headers: {
+            'Accept': '*/*',
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+        }
+    })
+    return data;
+}
+
+export async function getUsuarios(token: string) {
+    const data = await axios.get("http://192.168.0.115:8431/rpe/rpeUsuarios/1?page=0&size=100", {
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+        }
+    })
+    return data;
+}
+
+export async function getCargos(token: string) {
+    const data = await axios.get("http://192.168.0.115:8431/rpe/rpeCargos/1?page=0&size=100&sort=id.codigo,asc", {
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+        }
+    })
+    return data;
+}
+
+export async function getSectores(token: string) {
+    const data = await axios.get("http://192.168.0.115:8431/rpe/rpeSectores/lista/1?page=0&size=100&sort=id.codigo,asc", {
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+        }
+    })
+    return data;
+}
+
+export async function getSucursales(token: string) {
+    const data = await axios.get("http://192.168.0.115:8000/age-restaurant/ageSucursales/1?page=0&size=100&sort=id.codigo,asc", {
         headers: {
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json',

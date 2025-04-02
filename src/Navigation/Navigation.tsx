@@ -6,7 +6,7 @@ import { Login } from "../pages/login/login";
 import { TestPage } from "../pages/testpage/testpage";
 import { ToastContainer } from "react-toastify";
 import { NotFound } from "../pages/notfound/notfound";
-import { MainLayout } from "../pages/mainlayout/mainlayout";
+import { MainLayout } from "../layout/mainlayout";
 
 export const Navigation = () => {
 

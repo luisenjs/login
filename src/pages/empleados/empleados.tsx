@@ -215,6 +215,7 @@ export const Empleados = () => {
             error: "No se pudo eliminar el registro",
             success: "Registro eliminado"
         })
+        updateTable();
         setIsDeleteOpen(false);
     }
 

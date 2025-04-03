@@ -25,8 +25,6 @@ export async function loginreq(username: string, password: string): Promise<bool
             }
         })
         localStorage.setItem("token", data.data.access_token);
-        console.log(data.data)
-        console.log("acceso");
         return (true);
     } catch (error) {
         console.log(error)
@@ -42,8 +40,8 @@ export function logintest(username: string, password: string): boolean {
     return false;
 }
 
-export async function getEmpleados(token: string, page: number, size: number) {
-    const data = await axios.get(`http://192.168.0.115:8431/rpe/rpeEmpleados/1?page=${page}&size=${size}&sort=id.codigo%2Cdesc`, {
+export async function getEmpleados(token: string, page: number, size: number, filtro = "") {
+    const data = await axios.get(`http://192.168.0.115:8411/rpe/rpeEmpleados/1?filtro=${filtro}&page=${page}&size=${size}&sort=id.codigo%2Cdesc`, {
         headers: {
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json',
@@ -53,7 +51,7 @@ export async function getEmpleados(token: string, page: number, size: number) {
 }
 
 export async function putEmpleado(token: string, body: object) {
-    const data = await axios.put("http://192.168.0.115:8431/rpe/rpeEmpleados", body, {
+    const data = await axios.put("http://192.168.0.115:8411/rpe/rpeEmpleados", body, {
         headers: {
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json',
@@ -73,7 +71,7 @@ export async function getEmpleadoById(token: string, ageLicencCodigo: number, id
 }
 
 export async function postEmpleado(token: string, body: object) {
-    const data = await axios.post("http://192.168.0.115:8431/rpe/rpeEmpleados", body, {
+    const data = await axios.post("http://192.168.0.115:8411/rpe/rpeEmpleados", body, {
         headers: {
             'Accept': '*/*',
             'Authorization': 'Bearer ' + token,
@@ -115,6 +113,16 @@ export async function getSectores(token: string) {
 
 export async function getSucursales(token: string) {
     const data = await axios.get("http://192.168.0.115:8000/age-restaurant/ageSucursales/1?page=0&size=100&sort=id.codigo,asc", {
+        headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json',
+        }
+    })
+    return data;
+}
+
+export async function getEmpleadoByCargo(token: string, cargo: string) {
+    const data = await axios.get(`http://192.168.0.115:8431/rpe/rpeEmpleados/1?filtro=${cargo}&page=0`, {
         headers: {
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json',

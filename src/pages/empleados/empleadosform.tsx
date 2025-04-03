@@ -3,17 +3,34 @@ import { toast } from "react-toastify"
 import { Cargo, Content, Sector, Sucursal, Usuario } from '../../interfaces/empleadosInterface'
 import { getCargos, getSectores, getSucursales, getUsuarios, postEmpleado, putEmpleado } from '../../services/requests'
 import { useEffect, useState } from 'react'
+//import { z } from 'zod'
+//import { zodResolver } from '@hookform/resolvers/zod'
 
 type usuariosformprops = {
     className?: string,
     token: string,
     empleado?: Content,
-    onClose: () => void
+    onClose: () => void,
+    update: () => void
 }
 
-export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosformprops) => {
+export const EmpleadosForm = ({ className, token, empleado, onClose, update }: usuariosformprops) => {
 
-    const { register, handleSubmit, reset } = useForm({});
+    /*const empleadoSchema = z.object({
+        "numeroIdentificacion": z.string().regex(new RegExp(/^\+?[0-9]{10}$/), { message: "Ingresa una cédula válida" }),
+        "usuario.codigoExterno": z.string(),
+        //"sucursal.id.codigo": z.string(),
+        //"sector.id.codigo": z.string(),
+        "nombres": z.string().min(1, { message: "Ingrese sus nombres" }).max(30, { message: "Debe ser menor a 30 caracteres" }),
+        "apellidos": z.string().min(1, { message: "Ingrese sus apellidos" }).max(30, { message: "Debe ser menor a 30 caracteres" }),
+        //"cargo.id.codigo": z.string(),
+        "mailPrincipal": z.string().regex(new RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/), { message: "ingrese un correo válido" }),
+        "telefonoCelular": z.string().regex(new RegExp(/^\+?[0-9]{10}$/), { message: "Ingrese un teléfono válido" })
+    })*/
+
+    const { register, handleSubmit, reset, formState: { errors } } = useForm({
+        //resolver: zodResolver(empleadoSchema)
+    });
 
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
 
@@ -71,7 +88,7 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
                 "usuarioIngreso": empleado?.usuarioIngreso ?? 249,
                 "usuarioModificacion": 249,
                 "usuario": {
-                    "codigo":  1,
+                    "codigo": 1,
                     "ageLicencCodigo": 1,
                     "codigoExterno": data.usuario.codigoExterno
                 },
@@ -85,9 +102,12 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
             }
             console.log(body);
             if (!empleado) {
-                //const response = await getUsuarios(token);
-                //const usuarios = response.data.content;
-                //const usuarioIgual = usuarios.find((user: Usuario) => user.numeroIdentificacion === data.numeroIdentificacion);
+                const response = await getUsuarios(token);
+                const usuarios = response.data.content;
+                const usuarioIgual = usuarios.find((user: Usuario) => user.numeroIdentificacion === data.numeroIdentificacion);
+                if (!usuarioIgual) {
+                    toast.error("La cédula ingresada no existe en usuarios")
+                }
                 await toast.promise(postEmpleado(token, body), {
                     pending: "Crenado empleado...",
                     error: "No se pudo crear el empleado",
@@ -100,6 +120,7 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
                     success: "Campos actualizados"
                 })
             }
+            update();
             onClose();
         }
     }
@@ -112,6 +133,7 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
                         <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor=", index: number">Cédula</label>
                             <input className="border-1 border-gray-400 rounded p-2 w-full" type="text" {...register("numeroIdentificacion")} placeholder='0909090909' defaultValue={empleado ? empleado.numeroIdentificacion : ""} id="numeroIdentificacion" />
+                            {errors.numeroIdentificacion && <p className='text-red-400'>{errors.numeroIdentificacion.message?.toString()}</p>}
                         </div>
                         <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor="usuario">Usuario</label>
@@ -123,7 +145,8 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
                                     ))
                                 }
                             </select>
-                        </div>
+                            {/*errors.usuario.codigo && <p className='text-red-400'>{errors.usuario.codigo.message?.toString()}</p>*/}
+                        </div >
                         <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor="sucursal">Sucursal</label>
                             <select className="border-1 border-gray-400 rounded p-2 w-full" {...register("sucursal.id.codigo")} id="sucursal">
@@ -134,6 +157,7 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
                                     ))
                                 }
                             </select>
+                            {/*errors.sucursal.id.codigo && <p className='text-red-400'>{errors.sucursal.id.codigo.message?.toString()}</p>*/}
                         </div>
                         <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor="sector">Sector</label>
@@ -145,14 +169,17 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
                                     ))
                                 }
                             </select>
+                            {/*errors.sector.id.codigo && <p className='text-red-400'>{errors.sector.id.codigo.message?.toString()}</p>*/}
                         </div>
                         <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor="nombres">Nombres</label>
                             <input className="border-1 border-gray-400 rounded p-2 w-full" type="text" {...register("nombres")} placeholder='Nombres...' defaultValue={empleado ? empleado.nombres : ""} id="nombres" />
+                            {errors.nombres && <p className='text-red-400'>{errors.nombres.message?.toString()}</p>}
                         </div>
                         <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor="apellidos">Apellidos</label>
                             <input className="border-1 border-gray-400 rounded p-2 w-full" type="text" {...register("apellidos")} placeholder='Apellidos...' defaultValue={empleado ? empleado.apellidos : ""} id="apellidos" />
+                            {errors.apellidos && <p className='text-red-400'>{errors.apellidos.message?.toString()}</p>}
                         </div>
                         <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor="cargo">Cargo</label>
@@ -164,22 +191,25 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
                                     ))
                                 }
                             </select>
+                            {/*errors.cargo.id.codigo && <p className='text-red-400'>{errors.cargo.id.codigo.message?.toString()}</p>*/}
                         </div>
                         <div className="flex flex-col items-start w-full md:w-[48%]">
                             <label className="font-semibold" htmlFor="mailPrincipal">Correo</label>
                             <input className="border-1 border-gray-400 rounded p-2 w-full" type="text" {...register("mailPrincipal")} placeholder='dominio@example.com' defaultValue={empleado ? empleado.mailPrincipal : ""} id="mailPrincipal" />
+                            {errors.mailPrincipal && <p className='text-red-400'>{errors.mailPrincipal.message?.toString()}</p>}
                         </div>
                         <div className="flex flex-col items-start w-full md:w-[48%]">
                             <label className="font-semibold" htmlFor="telefonoCelular">Teléfono</label>
                             <input className="border-1 border-gray-400 rounded p-2 w-full" type="text" {...register("telefonoCelular")} placeholder='099999999' defaultValue={empleado ? empleado.telefonoCelular : ""} id="telefonoCelular" />
+                            {errors.telefonoCelular && <p className='text-red-400'>{errors.telefonoCelular.message?.toString()}</p>}
                         </div>
-                    </div>
+                    </div >
                     <div className='flex flex-row gap-3 justify-center'>
-                        <button className='bg-slate-100 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500 w-full' onClick={onClose}>Cancelar</button>
-                        <button className='bg-slate-300 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500 w-full' type='submit'>Guardar</button>
+                        <button className='active:bg-slate-300 hover:cursor-pointer bg-slate-100 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500 w-full' onClick={onClose}>Cancelar</button>
+                        <button className='active:bg-slate-400 hover:cursor-pointer bg-slate-300 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500 w-full' type='submit'>Guardar</button>
                     </div>
-                </form>
-            </div>
+                </form >
+            </div >
         </>
     )
 

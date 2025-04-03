@@ -18,16 +18,19 @@ export const LoginForm = ({ className }: loginprops) => {
     const navigate = useNavigate();
 
     const enviardatos = async (data: FieldValues) => {
-        console.log(data)
         reset();
-        const isLogin = await toast.promise(login(data.username, data.password), {
-            pending: "Verificando credenciales..."
-        })
-        if (isLogin) {
-            toast.success("Bienvenido");
-            navigate("/dashboard");
+        if (!data.username || !data.password) {
+            toast.error("Ingresa tus credenciales");
         } else {
-            toast.error("Usuario o contraseña incorrectos");
+            const isLogin = await toast.promise(login(data.username, data.password), {
+                pending: "Verificando credenciales..."
+            })
+            if (isLogin) {
+                toast.success("Bienvenido");
+                navigate("/dashboard");
+            } else {
+                toast.error("Usuario o contraseña incorrectos");
+            }
         }
     }
 
@@ -49,18 +52,18 @@ export const LoginForm = ({ className }: loginprops) => {
                             <input className="border-1 border-gray-400 rounded-lg p-2 w-full" type="password" {...register("password")} id="password" placeholder="At least 8 characteres" />
                         </div>
                         <div className="w-full flex-row justify-end text-right text-sky-600 hover:text-sky-800 hover:underline">
-                            <a>Forgot Password?</a>
+                            <a className='hover:cursor-pointer'>Forgot Password?</a>
                         </div>
-                        <Button isPrincipal={true}>Sign in</Button>
+                        <Button className="hover:shadow-lg hover:shadow-slate-600/50 focus:outline-4 focus:outline-offset-4 focus:outline-slate-500" isPrincipal={true}>Sign in</Button>
                     </form>
                     <div className="flex flex-row items-center gap-3">
                         <hr className="grow text-gray-400" /><p>Or</p><hr className="grow text-gray-400" />
                     </div>
                     <div className="flex flex-row sm:flex-col gap-2">
-                        <Button icon="/src/assets/Google.svg" isPrincipal={false}>Sign up with Google</Button>
-                        <Button icon="/src/assets/Facebook.svg" isPrincipal={false}>Sign up with Facebook</Button>
+                        <Button className='focus:outline-4 focus:outline-offset-4 focus:outline-slate-300' icon="/src/assets/Google.svg" isPrincipal={false}>Sign up with Google</Button>
+                        <Button className='focus:outline-4 focus:outline-offset-4 focus:outline-slate-300' icon="/src/assets/Facebook.svg" isPrincipal={false}>Sign up with Facebook</Button>
                     </div>
-                    <p>Don't you have an account? <a className="text-sky-600 hover:text-sky-800 hover:underline">Sign up</a></p>
+                    <p>Don't you have an account? <a className="text-sky-600 hover:text-sky-800 hover:underline hover:cursor-pointer">Sign up</a></p>
                 </div>
             </div>
         </>

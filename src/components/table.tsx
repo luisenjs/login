@@ -1,7 +1,11 @@
 import { useReactTable, getCoreRowModel, flexRender, AccessorKeyColumnDef, getSortedRowModel, getFilteredRowModel } from '@tanstack/react-table';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, SquarePen, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, SquarePen, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Cargo } from '../interfaces/empleadosInterface';
+import { getCargos } from '../services/requests';
 
 type tableprops<T> = {
+    token: string;
     tipo: string;
     data: T[] | undefined;
     columns: AccessorKeyColumnDef<T, string>[];
@@ -14,7 +18,22 @@ type tableprops<T> = {
     openDelete: (data: T) => void;
 }
 
-function Table<T>({ tipo, data, columns, page, setPage, totalPages, setSize, openNewForm, openEditForm, openDelete }: tableprops<T>) {
+function Table<T>({token, tipo, data, columns, page, setPage, totalPages, setSize, openNewForm, openEditForm, openDelete }: tableprops<T>) {
+
+    const [buscador, setBuscador] = useState<string>();
+
+    const [cargos, setCarago] = useState<Cargo[]>([]);
+
+    const [selectedCargo, setSelectedCargo] = useState<string>();
+
+    async () => {
+        const cargosRes = await getCargos(token);
+        setCarago(cargosRes.data.content);
+    }
+
+    const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedCargo(event.target.value);
+    };
 
     const table = useReactTable({
         data: data || [],
@@ -26,19 +45,28 @@ function Table<T>({ tipo, data, columns, page, setPage, totalPages, setSize, ope
 
     return (
         <div className='flex flex-col py-4 px-16 h-auto max-w-screen'>
-            <div className='flex flex-row justify-between items-center mb-4'>
+            <div className='flex flex-row justify-between items-end mb-4'>
                 <div className='flex flex-col gap-2 p-2'>
                     <h3 className='font-bold px-1 text-2xl text-slate-700'>Administración de {tipo}</h3>
                     <div className='flex flex-row gap-3'>
-                        <select className='border border-slate-200 bg-slate-100 p-2 w-64' name="departamente" id="departamento">
-                            <option value="1">Departamento 1</option>
-                        </select >
-                        <select className='border border-slate-200 bg-slate-100 p-2 w-64' name="departamente" id="departamento">
-                            <option value="1">Campo 1</option>
+                        <select className="border-1 border-gray-400 rounded p-2 w-full" value={selectedCargo} onChange={handleSelectChange} id="cargo">
+                            <option value="">Seleccione un cargo</option>
+                            {cargos &&
+                                cargos.map((cargo: Cargo, index: number) => (
+                                    <option key={index} value={cargo.id.codigo}>
+                                        {cargo.descripcion}
+                                    </option>
+                                ))}
                         </select>
                     </div>
                 </div>
-                <button className='bg-slate-300 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500' onClick={openNewForm}>Agregar {tipo}</button>
+                <div className='flex flex-row gap-5 justify-end mb-2'>
+                    <div className='flex relative w-60'>
+                        <Search className="size-6 text-gray-400 absolute left-2 top-2.5" />
+                        <input type="text" value={buscador} onChange={(e) => setBuscador(e.target.value)} placeholder='Buscar' className='w-full pl-10 py-2 rounded-lg border-2 border-gray-300' />
+                    </div>
+                    <button className='bg-slate-300 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500' onClick={openNewForm}>Agregar {tipo}</button>
+                </div>
             </div>
             <div className='bg-white shadow-md rounded-sm overflow-auto'>
                 <table className='w-full'>
@@ -80,6 +108,7 @@ function Table<T>({ tipo, data, columns, page, setPage, totalPages, setSize, ope
                         }
                     </tbody>
                 </table>
+                {data === undefined ? <p className='flex justify-center text-red-400 font-semibold italic'>No hay datos qué mostrar por el momento</p> : <></>}
             </div>
             <div className='flex justify-between items-center'>
                 <div className='flex gap-3 items-center p-3'>

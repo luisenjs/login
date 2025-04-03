@@ -1,7 +1,7 @@
 import { FieldValues, useForm } from 'react-hook-form'
 import { toast } from "react-toastify"
 import { Cargo, Content, Sector, Sucursal, Usuario } from '../../interfaces/empleadosInterface'
-import { getCargos, getSectores, getSucursales, getUsuarios, putEmpleado } from '../../services/requests'
+import { getCargos, getSectores, getSucursales, getUsuarios, postEmpleado, putEmpleado } from '../../services/requests'
 import { useEffect, useState } from 'react'
 
 type usuariosformprops = {
@@ -13,7 +13,7 @@ type usuariosformprops = {
 
 export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosformprops) => {
 
-    const { register, handleSubmit, reset } = useForm();
+    const { register, handleSubmit, reset } = useForm({});
 
     const [usuarios, setUsuarios] = useState<Usuario[]>([]);
 
@@ -39,87 +39,83 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
     }, [])
 
     const sendData = async (data: FieldValues) => {
-        if (data.numeroIdentificacion === "" || data.nombres === "" || data.apellidos === "" || data.mailPrincipal === "" || data.telefonoCelular === "" || data.cargo.descripcion === "") {
+        console.log(data);
+        if (data.numeroIdentificacion === "" || data.usuario.codigoExterno === "" || data.sucursal.id.codigo === "" || data.sector.id.codigo === "" || data.nombres === "" || data.apellidos === "" || data.cargo.id.codigo === "" || data.mailPrincipal === "" || data.telefonoCelular === "") {
             toast.error("Por favor, complete todos los campos requeridos.");
             reset();
         } else {
-            if (empleado) {
-                const body = {
+            const body = {
+                "id": {
+                    "codigo": empleado?.id.codigo ?? 0,
+                    "ageLicencCodigo": 1
+                },
+                "numeroIdentificacion": data.numeroIdentificacion,
+                "nombres": data.nombres,
+                "apellidos": data.apellidos,
+                "telefonoCelular": data.telefonoCelular,
+                "mailPrincipal": data.mailPrincipal,
+                "estado": empleado?.estado ?? "A",
+                "estadoAsignacion": empleado?.estadoAsignacion ?? "L",
+                "cargo": {
                     "id": {
-                        "codigo": empleado.id.codigo,
-                        "ageLicencCodigo": empleado.id.ageLicencCodigo
-                    },
-                    "numeroIdentificacion": data.numeroIdentificacion,
-                    "nombres": data.nombres,
-                    "apellidos": data.apellidos,
-                    "telefonoCelular": data.telefonoCelular,
-                    "mailPrincipal": data.mailPrincipal,
-                    "estado": empleado.estado,
-                    "estadoAsignacion": empleado.estadoAsignacion,
-                    "cargo": {
-                        "id": {
-                            "codigo": empleado.cargo.id.codigo,
-                            "ageLicencCodigo": empleado.cargo.id.ageLicencCodigo
-                        },
-                        "descripcion": data.cargo.descripcion
-                    },
-                    "sucursal": {
-                        "id": {
-                            "codigo": empleado.sucursal.id.codigo,
-                            "ageLicencCodigo": empleado.sucursal.id.ageLicencCodigo
-                        }
-                    },
-                    "usuarioIngreso": empleado.usuarioIngreso,
-                    "usuarioModificacion": empleado.usuarioModificacion,
-                    "usuario": {
-                        "codigo": empleado.usuario.codigo,
-                        "ageLicencCodigo": empleado.usuario.ageLicencCodigo
-                    },
-                    "sector": {
-                        "id": {
-                            "codigo": empleado.sector.id.codigo,
-                            "ageSucursAgeLicencCodigo": empleado.sector.id.ageSucursAgeLicencCodigo,
-                            "ageSucursCodigo": empleado.sector.id.ageSucursCodigo
-                        }
+                        "codigo": Number(data.cargo.id.codigo),
+                        "ageLicencCodigo": 1
+                    }
+                },
+                "sucursal": {
+                    "id": {
+                        "codigo": Number(data.sucursal.id.codigo),
+                        "ageLicencCodigo": 1
+                    }
+                },
+                "usuarioIngreso": empleado?.usuarioIngreso ?? 249,
+                "usuarioModificacion": 249,
+                "usuario": {
+                    "codigo":  1,
+                    "ageLicencCodigo": 1,
+                    "codigoExterno": data.usuario.codigoExterno
+                },
+                "sector": {
+                    "id": {
+                        "codigo": Number(data.sector.id.codigo),
+                        "ageSucursAgeLicencCodigo": 1,
+                        "ageSucursCodigo": 1
                     }
                 }
-                console.log(body);
+            }
+            console.log(body);
+            if (!empleado) {
+                //const response = await getUsuarios(token);
+                //const usuarios = response.data.content;
+                //const usuarioIgual = usuarios.find((user: Usuario) => user.numeroIdentificacion === data.numeroIdentificacion);
+                await toast.promise(postEmpleado(token, body), {
+                    pending: "Crenado empleado...",
+                    error: "No se pudo crear el empleado",
+                    success: "Empleado creado con éxito"
+                })
+            } else {
                 await toast.promise(putEmpleado(token, body), {
-                    pending: "Enviando...",
+                    pending: "Guardando cambios...",
                     error: "No se pudo actualizar los datos",
                     success: "Campos actualizados"
                 })
-                onClose();
-                toast.info("Sending...")
-            } else {
-                console.log(data);
-                const response = await getUsuarios(token);
-                const usuarios = response.data.content;
-                const usuarioIgual = usuarios.find((user: Usuario) => user.numeroIdentificacion === data.numeroIdentificacion);
-                if (!usuarioIgual) {
-                    toast.error("La cédula ingresada no existe en usuarios");
-                    reset();
-                } else {
-                    toast.info("Sending...")
-                    onClose();
-                }
             }
+            onClose();
         }
-
     }
 
     return (
         <>
             <div className={className}>
                 <form className="flex flex-col gap-5 max-h-[60vh] text-slate-700" onSubmit={handleSubmit(sendData)}>
-                    <div className='flex flex-row flex-wrap gap-4 items-center'>
-                        <div className="flex flex-col items-start w-full md:w-[48%] pr-2">
+                    <div className='flex flex-row flex-wrap md:gap-4 gap-2 items-center'>
+                        <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor=", index: number">Cédula</label>
                             <input className="border-1 border-gray-400 rounded p-2 w-full" type="text" {...register("numeroIdentificacion")} placeholder='0909090909' defaultValue={empleado ? empleado.numeroIdentificacion : ""} id="numeroIdentificacion" />
                         </div>
-                        <div className="flex flex-col items-start w-full md:w-[48%] pr-2">
+                        <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor="usuario">Usuario</label>
-                            <select className="border-1 border-gray-400 rounded p-2 w-full" {...register("usuario.codigoExterno")} id="usuario">
+                            <select className="border-1 border-gray-400 rounded p-2 w-full" {...register("usuario.codigo")} id="usuario">
                                 <option value="">Seleccione un usuario</option>
                                 {
                                     usuarios && usuarios.map((usuario: Usuario, index: number) => (
@@ -128,7 +124,7 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
                                 }
                             </select>
                         </div>
-                        <div className="flex flex-col items-start w-full md:w-[48%] pr-2">
+                        <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor="sucursal">Sucursal</label>
                             <select className="border-1 border-gray-400 rounded p-2 w-full" {...register("sucursal.id.codigo")} id="sucursal">
                                 <option value="">Seleccione una sucursal</option>
@@ -139,7 +135,7 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
                                 }
                             </select>
                         </div>
-                        <div className="flex flex-col items-start w-full md:w-[48%] pr-2">
+                        <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor="sector">Sector</label>
                             <select className="border-1 border-gray-400 rounded p-2 w-full" {...register("sector.id.codigo")} id="sector" >
                                 <option value="">Seleccione un sector</option>
@@ -150,15 +146,15 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
                                 }
                             </select>
                         </div>
-                        <div className="flex flex-col items-start w-full md:w-[48%] pr-2">
+                        <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor="nombres">Nombres</label>
                             <input className="border-1 border-gray-400 rounded p-2 w-full" type="text" {...register("nombres")} placeholder='Nombres...' defaultValue={empleado ? empleado.nombres : ""} id="nombres" />
                         </div>
-                        <div className="flex flex-col items-start w-full md:w-[48%] pr-2">
+                        <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor="apellidos">Apellidos</label>
                             <input className="border-1 border-gray-400 rounded p-2 w-full" type="text" {...register("apellidos")} placeholder='Apellidos...' defaultValue={empleado ? empleado.apellidos : ""} id="apellidos" />
                         </div>
-                        <div className="flex flex-col items-start w-full md:w-[48%] pr-2">
+                        <div className="flex flex-col items-start w-full sm:w-[48%]">
                             <label className="font-semibold" htmlFor="cargo">Cargo</label>
                             <select className="border-1 border-gray-400 rounded p-2 w-full" {...register("cargo.id.codigo")} id="cargo" >
                                 <option value="">Seleccione un cargo</option>
@@ -169,18 +165,18 @@ export const EmpleadosForm = ({ className, token, empleado, onClose }: usuariosf
                                 }
                             </select>
                         </div>
-                        <div className="flex flex-col items-start w-full md:w-[48%] pr-2">
+                        <div className="flex flex-col items-start w-full md:w-[48%]">
                             <label className="font-semibold" htmlFor="mailPrincipal">Correo</label>
                             <input className="border-1 border-gray-400 rounded p-2 w-full" type="text" {...register("mailPrincipal")} placeholder='dominio@example.com' defaultValue={empleado ? empleado.mailPrincipal : ""} id="mailPrincipal" />
                         </div>
-                        <div className="flex flex-col items-start w-full md:w-[48%] pr-2">
+                        <div className="flex flex-col items-start w-full md:w-[48%]">
                             <label className="font-semibold" htmlFor="telefonoCelular">Teléfono</label>
                             <input className="border-1 border-gray-400 rounded p-2 w-full" type="text" {...register("telefonoCelular")} placeholder='099999999' defaultValue={empleado ? empleado.telefonoCelular : ""} id="telefonoCelular" />
                         </div>
                     </div>
-                    <div className='flex flex-row gap-3 justify-center pr-2'>
+                    <div className='flex flex-row gap-3 justify-center'>
+                        <button className='bg-slate-100 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500 w-full' onClick={onClose}>Cancelar</button>
                         <button className='bg-slate-300 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500 w-full' type='submit'>Guardar</button>
-                        <button className='bg-slate-300 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500 w-full' onClick={onClose}>Cancelar</button>
                     </div>
                 </form>
             </div>

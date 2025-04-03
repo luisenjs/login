@@ -118,7 +118,6 @@ export const Empleados = () => {
     const [empleadoData, seEmpleadoData] = useState<Content | undefined>(undefined);
 
     async function getdata(page: number, size: number) {
-        console.log("haciendo petición...")
         if (!token) {
             toast.error("No autorizado");
         }
@@ -126,7 +125,6 @@ export const Empleados = () => {
             refreshToken(token!);
         }
         const data = await getEmpleados(token!, page, size);
-        console.log(data.data.content)
         setEmpleados(data.data.content)
         setTotalPages(data.data.totalPages);
     }
@@ -135,10 +133,16 @@ export const Empleados = () => {
         getdata(page, size)
     }, [page, size])
 
-    if (timeleft < 0) {
-        toast.info("El token ha expirado", { autoClose: false });
-        salir();
-    }
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (timeleft < 0) {
+                toast.info("El token ha expirado", { autoClose: false });
+                salir();
+                clearInterval(interval);
+            }
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [timeExp.exp]);
 
     function salir() {
         logout();
@@ -159,7 +163,7 @@ export const Empleados = () => {
         seEmpleadoData(empleado);
     }
 
-    function deleting(empleado: Content) {
+    async function deleting(empleado: Content) {
         const body = {
             "id": {
                 "codigo": empleado.id.codigo,
@@ -176,8 +180,7 @@ export const Empleados = () => {
                 "id": {
                     "codigo": empleado.cargo.id.codigo,
                     "ageLicencCodigo": empleado.cargo.id.ageLicencCodigo
-                },
-                "descripcion": empleado.cargo.descripcion
+                }
             },
             "sucursal": {
                 "id": {
@@ -185,11 +188,12 @@ export const Empleados = () => {
                     "ageLicencCodigo": empleado.sucursal.id.ageLicencCodigo
                 }
             },
-            "usuarioIngreso": empleado.usuarioIngreso,
-            "usuarioModificacion": empleado.usuarioModificacion,
+            "usuarioIngreso": 249,
+            "usuarioModificacion": 249,
             "usuario": {
-                "codigo": empleado.usuario.codigo,
-                "ageLicencCodigo": empleado.usuario.ageLicencCodigo
+                "codigo": 1,
+                "ageLicencCodigo": 1,
+                "codigoExterno": empleado.usuario.codigoExterno
             },
             "sector": {
                 "id": {
@@ -199,23 +203,27 @@ export const Empleados = () => {
                 }
             }
         }
-        putEmpleado(token!, body);
+        await toast.promise(putEmpleado(token!, body), {
+            pending: "Eliminando...",
+            error: "No se pudo eliminar el registro",
+            success: "Registro eliminado"
+        })
         setIsDeleteOpen(false);
     }
 
     return (
         <div className="flex flex-col gap-5 items-center h-screen max-w-screen">
-            <Table tipo="empleado" data={empleados} columns={columns} page={page} setPage={setPage} totalPages={totalPages} setSize={setSize} openNewForm={onCreate} openEditForm={onEdit} openDelete={onDelete}></Table>
-            <Modal className="rounded-sm" isOpen={isNewUserFormOpen} onClose={() => setIsNewUserFormOpen(false)} title="Crear nuevo usuario" description="Complete los campos para crear un nuevo usuario">
+            <Table token={token!} tipo="empleado" data={empleados} columns={columns} page={page} setPage={setPage} totalPages={totalPages} setSize={setSize} openNewForm={onCreate} openEditForm={onEdit} openDelete={onDelete}></Table>
+            <Modal className="w-[40vw] rounded-sm" isOpen={isNewUserFormOpen} onClose={() => setIsNewUserFormOpen(false)} title="Crear nuevo usuario" description="Complete los campos para crear un nuevo usuario">
                 <EmpleadosForm token={token!} className="w-full" onClose={() => setIsNewUserFormOpen(false)} />
             </Modal>
-            <Modal className="rounded-sm" isOpen={isUpdateUserFormOpen} onClose={() => setIsUpdateUserFormOpen(false)} title="Editar usuario" description="Complete los campos para actualizar el usuario">
+            <Modal className="w-[40vw] rounded-sm" isOpen={isUpdateUserFormOpen} onClose={() => setIsUpdateUserFormOpen(false)} title="Editar usuario" description="Complete los campos para actualizar el usuario">
                 <EmpleadosForm token={token!} className="w-full" onClose={() => setIsUpdateUserFormOpen(false)} empleado={empleadoData} />
             </Modal>
-            <Modal isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Eliminar registro" description="¿Estás seguro que querés eliminar este registro?">
+            <Modal className="w-[30vw]" isOpen={isDeleteOpen} onClose={() => setIsDeleteOpen(false)} title="Eliminar registro" description="¿Estás seguro que querés eliminar este registro?">
                 <div className='flex flex-row gap-3 justify-center pr-2'>
+                    <button className='bg-slate-100 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500 w-full' onClick={() => setIsDeleteOpen(false)}>Cancelar</button>
                     <button className='bg-slate-300 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500 w-full' onClick={() => { console.log("Eliminando..."); deleting(empleadoData!) }}>Eliminar</button>
-                    <button className='bg-slate-300 text-slate-700 font-medium max-h-11 px-6 py-2 rounded-sm border-1 border-slate-300 hover:border-slate-500 w-full' onClick={() => setIsDeleteOpen(false)}>Cancelar</button>
                 </div>
             </Modal>
         </div>

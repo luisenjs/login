@@ -31,7 +31,7 @@ const Modal = ({ className, isOpen, onClose, title, description, children }: mod
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/70">
-            <div className={`${className} bg-white text-slate-700 rounded-lg shadow-lg p-6 z-20 max-h-fit min-w-[50vw] max-w-[70vw] relative`}>
+            <div className={`${className} bg-white text-slate-700 rounded-lg shadow-lg p-6 z-20 max-h-fit min-w-[20vw] max-w-[70vw] relative`}>
                 <button className="absolute top-6 right-6 text-gray-800 hover:text-gray-500 text-2xl font-bold" onClick={onClose}>
                     ✕
                 </button>

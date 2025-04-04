@@ -1,6 +1,6 @@
 import { FieldValues, useForm } from 'react-hook-form'
 import { toast } from "react-toastify"
-import { Cargo, Content, Sector, Sucursal, Usuario } from '../../interfaces/empleadosInterface'
+import { Cargo, Empleado, Sector, Sucursal, Usuario } from '../../interfaces/empleadosInterface'
 import { getCargos, getSectores, getSucursales, getUsuarios, postEmpleado, putEmpleado } from '../../services/requests'
 import { useEffect, useState } from 'react'
 //import { z } from 'zod'
@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react'
 type usuariosformprops = {
     className?: string,
     token: string,
-    empleado?: Content,
+    empleado?: Empleado,
     onClose: () => void,
     update: () => void
 }
@@ -46,7 +46,7 @@ export const EmpleadosForm = ({ className, token, empleado, onClose, update }: u
         const cargosRes = await getCargos(token);
         setCarago(cargosRes.data.content);
         const sectoresRes = await getSectores(token);
-        setSectores(sectoresRes.data);
+        setSectores(sectoresRes.data.data);
         const sucursalesRes = await getSucursales(token);
         setSucursales(sucursalesRes.data.content);
     }

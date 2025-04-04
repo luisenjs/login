@@ -1,12 +1,19 @@
-export interface Response {
-    data: Data;
+export interface Response<T> {
+    data: Data<T>;
     status: number;
     statusText: string;
     request: Request;
 }
 
-export interface Data {
-    content: Content[];
+export interface ResposeSector {
+    data: Sector[];
+    status: number;
+    statusText: string;
+    request: Request;
+}
+
+export interface Data<T> {
+    content: T[];
     pageable: Pageable;
     totalPages: number;
     totalElements: number;
@@ -19,7 +26,7 @@ export interface Data {
     empty: boolean;
 }
 
-export interface Content {
+export interface Empleado {
     id: ID;
     ageSucursCodigo: number;
     numeroIdentificacion: string;
@@ -95,16 +102,6 @@ export interface Sort {
     unsorted: boolean;
     empty: boolean;
     sorted: boolean;
-}
-
-export type ShowEmpleado = {
-    id: ID;
-    numeroIdentificacion: string;
-    nombres: string;
-    apellidos: string;
-    telefonoCelular: string;
-    mailPrincipal: string;
-    cargo: Cargo;
 }
 
 export interface Usuario {

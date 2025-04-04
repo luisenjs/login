@@ -116,7 +116,7 @@ function Table<T>({ token, tipo, data, columns, page, setPage, totalPages, setSi
                         }
                     </tbody>
                 </table>
-                {data === undefined ? <p className='flex justify-center text-red-400 font-semibold italic'>No hay datos qué mostrar por el momento</p> : <></>}
+                {data === undefined || data.length === 0 ? <p className='flex justify-center text-red-400 font-semibold italic'>No hay datos qué mostrar por el momento</p> : <></>}
             </div>
             <div className='flex justify-between items-center'>
                 <div className='flex gap-3 items-center p-3'>
